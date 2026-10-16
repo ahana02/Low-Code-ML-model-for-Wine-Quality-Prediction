@@ -5,12 +5,7 @@ built one file per pipeline step so each stage (loading, cleaning,
 feature engineering, training, evaluation, inference) can be read,
 tested, and modified independently.
 
-> **Note on the data file:** the sandbox this was built in can't reach
-> kaggle.com, so `data/winequality-red.csv` here is pulled from a public
-> mirror of the original UCI dataset -- **identical 12 columns** to the
-> Kaggle version (Kaggle just adds a leading `Id` column, which
-> `data_loader.py` already detects and drops). Drop the actual Kaggle
-> CSV into `data/winequality-red.csv` and everything below runs unchanged.
+
 
 ## Quick start
 
@@ -49,10 +44,8 @@ in one place (`config.py`) to make "good" stricter/looser.
 **Preprocessing found and fixed real issues in this data:**
 - 240 of 1599 rows (15%) are exact duplicates — dropped.
 - `residual sugar`, `chlorides`, `free/total sulfur dioxide`, and
-  `sulphates` all have long right tails (verified via `.describe()` —
-  max values several IQRs above the 75th percentile). These are capped
-  (winsorized) rather than dropped, since the dataset is small enough
-  that discarding rows loses more signal than it's worth.
+  `sulphates` all have long right tails. These are capped
+  (winsorized) rather than dropped, since the dataset is small as discarding rows loses more signal than it's worth.
 
 **Stratify on a quality bucket, not the binary target directly.**
 `quality_bucket` (low/medium/high, `config.QUALITY_BUCKETS`) groups raw
@@ -77,19 +70,12 @@ Precision/recall/F1/ROC-AUC are reported together so minority-class
 environment/library version)
 
 ```
-accuracy:  0.868
-precision: 0.512
-recall:    0.568
-f1:        0.538
-roc_auc:   0.887
+accuracy:  0.871
+precision: 0.526
+recall:    0.541
+f1:        0.533
+roc_auc:   0.893
 ```
-
-Recall/precision on the minority class have real room to improve —
-natural next steps: hyperparameter search (grid/random search over
-`n_estimators`/`max_depth`), trying gradient boosting, or explicit
-resampling (SMOTE) instead of only class weighting. The one-file-per-step
-structure means any of these is a change to a single file
-(`pipeline_builder.py` or `train.py`) without touching the rest.
 
 ## Scoring new wines
 
